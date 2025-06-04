@@ -53,7 +53,12 @@ function login() {
 
 function showForm(type) {
   const container = document.getElementById("formContainer");
+
+  // Hapus semua class form-* jika ada
+  container.classList.remove("form-absen", "form-cuti", "form-kasbon");
+
   if (type === "cuti") {
+    container.classList.add("form-cuti");
     container.innerHTML = `
       <h3>Form Pengajuan Cuti</h3>
       <input type="date" placeholder="Mulai Cuti"/>
@@ -62,6 +67,7 @@ function showForm(type) {
       <button>Ajukan Cuti</button>
     `;
   } else if (type === "kasbon") {
+    container.classList.add("form-kasbon");
     container.innerHTML = `
       <h3>Form Pengajuan Kasbon</h3>
       <input type="number" min="0" max="5000000" placeholder="Jumlah"/>
@@ -69,6 +75,7 @@ function showForm(type) {
       <button>Ajukan Kasbon</button>
     `;
   } else if (type === "absen") {
+    container.classList.add("form-absen");
     container.innerHTML = `
       <h3>Form Absensi</h3>
       <input type="date"/>
