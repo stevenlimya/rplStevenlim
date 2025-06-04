@@ -232,5 +232,117 @@ function tolakKasbon(index) {
   renderKasbonAdmin();
 }
 
+function showRiwayat() {
+  const container = document.getElementById("formContainer");
+  const cuti = JSON.parse(localStorage.getItem("cuti") || "[]");
+  const kasbon = JSON.parse(localStorage.getItem("kasbon") || "[]");
+  const user = getLoggedInUsername();
+
+  const userCuti = cuti.filter(item => item.nama === user);
+  const userKasbon = kasbon.filter(item => item.nama === user);
+
+  let html = `
+    <h3>Riwayat Cuti & Kasbon</h3>
+    <label>Filter Status:
+      <select id="filterStatus" onchange="filterRiwayat()">
+        <option value="">Semua</option>
+        <option value="Menunggu">Menunggu</option>
+        <option value="Disetujui">Disetujui</option>
+        <option value="Ditolak">Ditolak</option>
+      </select>
+    </label>
+    <label>Filter Tanggal:
+      <input type="date" id="filterDate" onchange="filterRiwayat()" />
+    </label>
+    <input type="text" id="searchKeyword" placeholder="Cari alasan..." oninput="filterRiwayat()" />
+    <button onclick="exportToExcel()">Export ke Excel</button>
+    <button onclick="window.print()">Print / PDF</button>
+    <div id="riwayatContainer">
+      ${generateRiwayatHTML(userCuti, userKasbon)}
+    </div>
+  `;
+  container.innerHTML = html;
+  window._riwayatData = { cuti: userCuti, kasbon: userKasbon }; // Simpan data global
+}
+
+function generateRiwayatHTML(cuti, kasbon) {
+  let html = "<h4>Cuti</h4>";
+  if (cuti.length === 0) html += "<p>Tidak ada data cuti.</p>";
+  else {
+    cuti.forEach(item => {
+      html += `
+        <div>
+          ${item.mulai} - ${item.selesai} | ${item.status} <br/>
+          Alasan: ${item.alasan}
+        </div><hr/>
+      `;
+    });
+  }
+
+  html += "<h4>Kasbon</h4>";
+  if (kasbon.length === 0) html += "<p>Tidak ada data kasbon.</p>";
+  else {
+    kasbon.forEach(item => {
+      html += `
+        <div>
+          Jumlah: Rp${item.jumlah} | ${item.status} <br/>
+          Alasan: ${item.alasan}
+        </div><hr/>
+      `;
+    });
+  }
+
+  return html;
+}
+
+function filterRiwayat() {
+  const status = document.getElementById("filterStatus").value;
+  const date = document.getElementById("filterDate").value;
+  const keyword = document.getElementById("searchKeyword").value.toLowerCase();
+
+  let cuti = window._riwayatData.cuti;
+  let kasbon = window._riwayatData.kasbon;
+
+  if (status) {
+    cuti = cuti.filter(item => item.status === status);
+    kasbon = kasbon.filter(item => item.status === status);
+  }
+
+  if (date) {
+    cuti = cuti.filter(item => item.mulai <= date && item.selesai >= date);
+    kasbon = kasbon.filter(item => {
+      const kasbonDate = item.tanggal || "";
+      return kasbonDate === date;
+    });
+  }
+
+  if (keyword) {
+    cuti = cuti.filter(item => item.alasan.toLowerCase().includes(keyword));
+    kasbon = kasbon.filter(item => item.alasan.toLowerCase().includes(keyword));
+  }
+
+  document.getElementById("riwayatContainer").innerHTML = generateRiwayatHTML(cuti, kasbon);
+}
+
+function exportToExcel() {
+  let cuti = window._riwayatData.cuti;
+  let kasbon = window._riwayatData.kasbon;
+  let csv = "Jenis,Tanggal/Jumlah,Alasan,Status\n";
+
+  cuti.forEach(item => {
+    csv += `Cuti,${item.mulai} s.d ${item.selesai},"${item.alasan}",${item.status}\n`;
+  });
+
+  kasbon.forEach(item => {
+    csv += `Kasbon,${item.jumlah},"${item.alasan}",${item.status}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "riwayat_cuti_kasbon.csv";
+  link.click();
+}
+
 
 
