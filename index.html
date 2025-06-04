@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -15,10 +16,8 @@
   </style>
 </head>
 <body>
-  <!-- Halaman Login -->
   <div class="container" id="loginPage">
     <img src="assets/bearindo.png" alt="Logo Sistem" class="logo" />
-    
     <h2>Login Pengguna</h2>
     <input type="text" id="username" placeholder="Username"/>
     <input type="password" id="password" placeholder="Password"/>
@@ -31,7 +30,6 @@
     <button onclick="togglePage('register')">Belum punya akun? Daftar</button>
   </div>
 
-  <!-- Halaman Registrasi -->
   <div class="container hidden" id="registerPage">
     <h2>Registrasi Akun</h2>
     <input type="text" id="newUsername" placeholder="Username Baru" />
@@ -45,14 +43,12 @@
     <button onclick="togglePage('login')">Sudah punya akun? Login</button>
   </div>
 
-  <!-- Halaman Dashboard -->
   <div class="container hidden" id="dashboard">
     <h2>Dashboard <span id="userRole"></span></h2>
     <button onclick="showForm('absen')">Form Absensi</button>
     <button onclick="showForm('cuti')">Form Cuti</button>
     <button onclick="showForm('kasbon')">Form Kasbon</button>
 
-    <!-- Panel Khusus Admin/Manajer -->
     <div id="adminTools" class="hidden">
       <h3>Panel Admin/Manajer</h3>
       <button onclick="showAdminPanel('absensi')">Kelola Absensi</button>

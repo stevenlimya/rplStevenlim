@@ -1,3 +1,4 @@
+// script.js
 function togglePage(page) {
   const loginPage = document.getElementById("loginPage");
   const registerPage = document.getElementById("registerPage");
@@ -52,6 +53,7 @@ function login() {
   );
 
   if (user) {
+    sessionStorage.setItem("loggedInUser", user.username);
     document.getElementById("loginPage").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
 
@@ -66,6 +68,10 @@ function login() {
   } else {
     alert("Login gagal! Periksa kembali username, password, dan role Anda.");
   }
+}
+
+function getLoggedInUsername() {
+  return sessionStorage.getItem("loggedInUser") || "Tidak dikenal";
 }
 
 function showAlert(message) {
@@ -91,7 +97,7 @@ function showForm(type) {
       <input type="date" placeholder="Mulai Cuti"/>
       <input type="date" placeholder="Selesai Cuti"/>
       <textarea placeholder="Alasan"></textarea>
-      <button onclick="showAlert('Berhasil Mengajukan Cuti!')">Ajukan Cuti</button>
+      <button onclick="ajukanCuti()">Ajukan Cuti</button>
     `;
   } else if (type === "kasbon") {
     container.classList.add("form-kasbon");
@@ -99,7 +105,7 @@ function showForm(type) {
       <h3>Form Pengajuan Kasbon</h3>
       <input type="number" min="0" max="5000000" placeholder="Jumlah"/>
       <textarea placeholder="Alasan"></textarea>
-      <button onclick="showAlert('Berhasil Mengajukan Kasbon!')">Ajukan Kasbon</button>
+      <button onclick="ajukanKasbon()">Ajukan Kasbon</button>
     `;
   } else if (type === "absen") {
     container.classList.add("form-absen");
@@ -114,42 +120,117 @@ function showForm(type) {
   container.innerHTML = formHTML;
 }
 
+function ajukanCuti() {
+  const mulai = document.querySelector('input[placeholder="Mulai Cuti"]').value;
+  const selesai = document.querySelector('input[placeholder="Selesai Cuti"]').value;
+  const alasan = document.querySelector('textarea').value;
+
+  if (!mulai || !selesai || !alasan) return alert("Lengkapi semua data cuti!");
+
+  const data = JSON.parse(localStorage.getItem("cuti") || "[]");
+  data.push({ nama: getLoggedInUsername(), mulai, selesai, alasan, status: "Menunggu" });
+  localStorage.setItem("cuti", JSON.stringify(data));
+  showAlert("Pengajuan cuti berhasil dikirim!");
+}
+
+function ajukanKasbon() {
+  const jumlah = document.querySelector('input[type="number"]').value;
+  const alasan = document.querySelector('textarea').value;
+
+  if (!jumlah || !alasan) return alert("Lengkapi semua data kasbon!");
+
+  const data = JSON.parse(localStorage.getItem("kasbon") || "[]");
+  data.push({ nama: getLoggedInUsername(), jumlah, alasan, status: "Menunggu" });
+  localStorage.setItem("kasbon", JSON.stringify(data));
+  showAlert("Pengajuan kasbon berhasil dikirim!");
+}
+
 function showAdminPanel(type) {
+  if (type === "cuti") return renderCutiAdmin();
+  if (type === "kasbon") return renderKasbonAdmin();
+
   const container = document.getElementById("formContainer");
-  container.classList.remove("form-absen", "form-cuti", "form-kasbon");
+  container.innerHTML = `
+    <h3>Kelola Data Absensi</h3>
+    <input type="text" placeholder="Nama Karyawan"/>
+    <select>
+      <option>Hadir</option>
+      <option>Izin</option>
+      <option>Alpha</option>
+    </select>
+    <button onclick="showAlert('Data Absensi Diperbarui')">Simpan Perubahan</button>
+  `;
+}
 
-  let html = `<div id="alertBox" class="alert hidden"></div>`;
+function renderCutiAdmin() {
+  const container = document.getElementById("formContainer");
+  const data = JSON.parse(localStorage.getItem("cuti") || "[]");
 
-  if (type === "absensi") {
+  let html = `<h3>Daftar Pengajuan Cuti</h3>`;
+  data.forEach((item, index) => {
     html += `
-      <h3>Kelola Data Absensi</h3>
-      <input type="text" placeholder="Nama Karyawan"/>
-      <select>
-        <option>Hadir</option>
-        <option>Izin</option>
-        <option>Alpha</option>
-      </select>
-      <button onclick="showAlert('Data Absensi Diperbarui')">Simpan Perubahan</button>
+      <div class="form-cuti" style="margin-bottom: 15px">
+        <p><strong>${item.nama}</strong> | ${item.mulai} s.d ${item.selesai}</p>
+        <p>Alasan: ${item.alasan}</p>
+        <p>Status: ${item.status}</p>
+        ${item.status === "Menunggu" ? `
+          <button onclick="setujuiCuti(${index})">Setujui</button>
+          <button onclick="tolakCuti(${index})">Tolak</button>
+        ` : ""}
+      </div>
     `;
-  } else if (type === "cuti") {
-    html += `
-      <h3>Persetujuan Cuti</h3>
-      <strong>Nama:</strong> Agus<br>
-      <strong>Tanggal:</strong> 12–14 Juni<br>
-      <button onclick="showAlert('Cuti Disetujui')">Setujui</button>
-      <button onclick="showAlert('Cuti Ditolak')">Tolak</button>
-    `;
-  } else if (type === "kasbon") {
-    html += `
-      <h3>Persetujuan Kasbon</h3>
-      <strong>Nama:</strong> Dina<br>
-      <strong>Jumlah:</strong> Rp 1.000.000<br>
-      <button onclick="showAlert('Kasbon Disetujui')">Setujui</button>
-      <button onclick="showAlert('Kasbon Ditolak')">Tolak</button>
-    `;
-  }
-
+  });
   container.innerHTML = html;
 }
+
+function renderKasbonAdmin() {
+  const container = document.getElementById("formContainer");
+  const data = JSON.parse(localStorage.getItem("kasbon") || "[]");
+
+  let html = `<h3>Daftar Pengajuan Kasbon</h3>`;
+  data.forEach((item, index) => {
+    html += `
+      <div class="form-kasbon" style="margin-bottom: 15px">
+        <p><strong>${item.nama}</strong> - Rp ${item.jumlah}</p>
+        <p>Alasan: ${item.alasan}</p>
+        <p>Status: ${item.status}</p>
+        ${item.status === "Menunggu" ? `
+          <button onclick="setujuiKasbon(${index})">Setujui</button>
+          <button onclick="tolakKasbon(${index})">Tolak</button>
+        ` : ""}
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function setujuiCuti(index) {
+  const data = JSON.parse(localStorage.getItem("cuti"));
+  data[index].status = "Disetujui";
+  localStorage.setItem("cuti", JSON.stringify(data));
+  renderCutiAdmin();
+}
+
+function tolakCuti(index) {
+  const data = JSON.parse(localStorage.getItem("cuti"));
+  data[index].status = "Ditolak";
+  localStorage.setItem("cuti", JSON.stringify(data));
+  renderCutiAdmin();
+}
+
+function setujuiKasbon(index) {
+  const data = JSON.parse(localStorage.getItem("kasbon"));
+  data[index].status = "Disetujui";
+  localStorage.setItem("kasbon", JSON.stringify(data));
+  renderKasbonAdmin();
+}
+
+function tolakKasbon(index) {
+  const data = JSON.parse(localStorage.getItem("kasbon"));
+  data[index].status = "Ditolak";
+  localStorage.setItem("kasbon", JSON.stringify(data));
+  renderKasbonAdmin();
+}
+
 
 
