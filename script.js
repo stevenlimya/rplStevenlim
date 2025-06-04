@@ -51,36 +51,51 @@ function login() {
   }
 }
 
+function showAlert(message) {
+  const alertBox = document.getElementById("alertBox");
+  alertBox.innerText = message;
+  alertBox.classList.remove("hidden");
+
+  setTimeout(() => {
+    alertBox.classList.add("hidden");
+  }, 3000);
+}
+
 function showForm(type) {
   const container = document.getElementById("formContainer");
 
   // Hapus semua class form-* jika ada
   container.classList.remove("form-absen", "form-cuti", "form-kasbon");
 
+  let formHTML = `<div id="alertBox" class="alert hidden"></div>`;
+
   if (type === "cuti") {
     container.classList.add("form-cuti");
-    container.innerHTML = `
+    formHTML += `
       <h3>Form Pengajuan Cuti</h3>
       <input type="date" placeholder="Mulai Cuti"/>
       <input type="date" placeholder="Selesai Cuti"/>
       <textarea placeholder="Alasan"></textarea>
-      <button>Ajukan Cuti</button>
+      <button onclick="showAlert('Berhasil Mengajukan Cuti!')">Ajukan Cuti</button>
     `;
   } else if (type === "kasbon") {
     container.classList.add("form-kasbon");
-    container.innerHTML = `
+    formHTML += `
       <h3>Form Pengajuan Kasbon</h3>
       <input type="number" min="0" max="5000000" placeholder="Jumlah"/>
       <textarea placeholder="Alasan"></textarea>
-      <button>Ajukan Kasbon</button>
+      <button onclick="showAlert('Berhasil Mengajukan Kasbon!')">Ajukan Kasbon</button>
     `;
   } else if (type === "absen") {
     container.classList.add("form-absen");
-    container.innerHTML = `
+    formHTML += `
       <h3>Form Absensi</h3>
       <input type="date"/>
       <label><input type="checkbox" /> Hadir</label>
-      <button>Simpan Absensi</button>
+      <button onclick="showAlert('Berhasil Meng-absen!')">Simpan Absensi</button>
     `;
   }
+
+  container.innerHTML = formHTML;
 }
+

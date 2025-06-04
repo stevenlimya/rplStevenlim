@@ -117,6 +117,18 @@ button + button:hover {
   border-radius: 12px;
 }
 
+/* Notifikasi alert */
+.alert {
+  padding: 12px 16px;
+  background-color: #28a745;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
 /* Logo */
 .logo {
   display: block;
@@ -141,4 +153,5 @@ button + button:hover {
     transform: translateY(0);
   }
 }
+
 
