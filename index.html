@@ -51,10 +51,20 @@
     <button onclick="showForm('absen')">Form Absensi</button>
     <button onclick="showForm('cuti')">Form Cuti</button>
     <button onclick="showForm('kasbon')">Form Kasbon</button>
+
+    <!-- Panel Khusus Admin/Manajer -->
+    <div id="adminTools" class="hidden">
+      <h3>Panel Admin/Manajer</h3>
+      <button onclick="showAdminPanel('absensi')">Kelola Absensi</button>
+      <button onclick="showAdminPanel('cuti')">Persetujuan Cuti</button>
+      <button onclick="showAdminPanel('kasbon')">Persetujuan Kasbon</button>
+    </div>
+
     <div id="formContainer"></div>
   </div>
 
   <script src="script.js"></script>
 </body>
 </html>
+
 

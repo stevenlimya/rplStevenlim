@@ -37,15 +37,32 @@ function register() {
 function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
-  const role = document.getElementById("role").value;
+  const selectedRole = document.getElementById("role").value;
 
   const users = JSON.parse(localStorage.getItem("users") || "[]");
-  const user = users.find(u => u.username === username && u.password === password && u.role === role);
+
+  const user = users.find(u =>
+    u.username === username &&
+    u.password === password &&
+    (
+      (selectedRole === "admin" || selectedRole === "manajer")
+        ? (u.role === "admin" || u.role === "manajer")
+        : u.role === selectedRole
+    )
+  );
 
   if (user) {
     document.getElementById("loginPage").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
-    document.getElementById("userRole").innerText = role.charAt(0).toUpperCase() + role.slice(1);
+
+    const displayRole = (user.role === "admin" || user.role === "manajer") ? "Admin/Manajer" : selectedRole;
+    document.getElementById("userRole").innerText = displayRole;
+
+    if (user.role === "admin" || user.role === "manajer") {
+      document.getElementById("adminTools").classList.remove("hidden");
+    } else {
+      document.getElementById("adminTools").classList.add("hidden");
+    }
   } else {
     alert("Login gagal! Periksa kembali username, password, dan role Anda.");
   }
@@ -63,8 +80,6 @@ function showAlert(message) {
 
 function showForm(type) {
   const container = document.getElementById("formContainer");
-
-  // Hapus semua class form-* jika ada
   container.classList.remove("form-absen", "form-cuti", "form-kasbon");
 
   let formHTML = `<div id="alertBox" class="alert hidden"></div>`;
@@ -98,4 +113,43 @@ function showForm(type) {
 
   container.innerHTML = formHTML;
 }
+
+function showAdminPanel(type) {
+  const container = document.getElementById("formContainer");
+  container.classList.remove("form-absen", "form-cuti", "form-kasbon");
+
+  let html = `<div id="alertBox" class="alert hidden"></div>`;
+
+  if (type === "absensi") {
+    html += `
+      <h3>Kelola Data Absensi</h3>
+      <input type="text" placeholder="Nama Karyawan"/>
+      <select>
+        <option>Hadir</option>
+        <option>Izin</option>
+        <option>Alpha</option>
+      </select>
+      <button onclick="showAlert('Data Absensi Diperbarui')">Simpan Perubahan</button>
+    `;
+  } else if (type === "cuti") {
+    html += `
+      <h3>Persetujuan Cuti</h3>
+      <strong>Nama:</strong> Agus<br>
+      <strong>Tanggal:</strong> 12–14 Juni<br>
+      <button onclick="showAlert('Cuti Disetujui')">Setujui</button>
+      <button onclick="showAlert('Cuti Ditolak')">Tolak</button>
+    `;
+  } else if (type === "kasbon") {
+    html += `
+      <h3>Persetujuan Kasbon</h3>
+      <strong>Nama:</strong> Dina<br>
+      <strong>Jumlah:</strong> Rp 1.000.000<br>
+      <button onclick="showAlert('Kasbon Disetujui')">Setujui</button>
+      <button onclick="showAlert('Kasbon Ditolak')">Tolak</button>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
 
