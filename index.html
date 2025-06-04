@@ -15,8 +15,8 @@
   </style>
 </head>
 <body>
+  <!-- Halaman Login -->
   <div class="container" id="loginPage">
-    <!-- Tambahkan logo di sini -->
     <img src="assets/bearindo.png" alt="Logo Sistem" class="logo" />
     
     <h2>Login Pengguna</h2>
@@ -28,8 +28,24 @@
       <option value="manajer">Manajer</option>
     </select>
     <button onclick="login()">Login</button>
+    <button onclick="togglePage('register')">Belum punya akun? Daftar</button>
   </div>
 
+  <!-- Halaman Registrasi -->
+  <div class="container hidden" id="registerPage">
+    <h2>Registrasi Akun</h2>
+    <input type="text" id="newUsername" placeholder="Username Baru" />
+    <input type="password" id="newPassword" placeholder="Password Baru" />
+    <select id="newRole">
+      <option value="karyawan">Karyawan</option>
+      <option value="admin">Admin</option>
+      <option value="manajer">Manajer</option>
+    </select>
+    <button onclick="register()">Daftar</button>
+    <button onclick="togglePage('login')">Sudah punya akun? Login</button>
+  </div>
+
+  <!-- Halaman Dashboard -->
   <div class="container hidden" id="dashboard">
     <h2>Dashboard <span id="userRole"></span></h2>
     <button onclick="showForm('absen')">Form Absensi</button>
@@ -41,3 +57,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
