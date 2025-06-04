@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sistem Kepegawaian</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .logo {
+      width: 150px;
+      height: auto;
+      display: block;
+      margin: 0 auto 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="loginPage">
+    <!-- Tambahkan logo di sini -->
+    <img src="assets/bearindo.png" alt="Logo Sistem" class="logo" />
+    
+    <h2>Login Pengguna</h2>
+    <input type="text" id="username" placeholder="Username"/>
+    <input type="password" id="password" placeholder="Password"/>
+    <select id="role">
+      <option value="karyawan">Karyawan</option>
+      <option value="admin">Admin</option>
+      <option value="manajer">Manajer</option>
+    </select>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="container hidden" id="dashboard">
+    <h2>Dashboard <span id="userRole"></span></h2>
+    <button onclick="showForm('absen')">Form Absensi</button>
+    <button onclick="showForm('cuti')">Form Cuti</button>
+    <button onclick="showForm('kasbon')">Form Kasbon</button>
+    <div id="formContainer"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
