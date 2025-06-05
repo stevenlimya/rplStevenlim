@@ -1,4 +1,3 @@
-// script.js
 function togglePage(page) {
   const loginPage = document.getElementById("loginPage");
   const registerPage = document.getElementById("registerPage");
@@ -12,33 +11,62 @@ function togglePage(page) {
   }
 }
 
-function register() {
-  const username = document.getElementById("newUsername").value.trim();
-  const password = document.getElementById("newPassword").value.trim();
-  const role = document.getElementById("newRole").value;
+// ======= FITUR BRUTE FORCE =======
+function isAccountLocked(username) {
+  const lockInfo = JSON.parse(localStorage.getItem("loginLocks") || "{}");
+  const userLock = lockInfo[username];
 
-  if (username && password) {
-    let users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    if (users.find(user => user.username === username)) {
-      alert("Username sudah terdaftar!");
-      return;
+  if (userLock && userLock.lockUntil) {
+    const now = Date.now();
+    if (now < userLock.lockUntil) {
+      return true;
+    } else {
+      delete lockInfo[username];
+      localStorage.setItem("loginLocks", JSON.stringify(lockInfo));
     }
-
-    users.push({ username, password, role });
-    localStorage.setItem("users", JSON.stringify(users));
-
-    alert("Registrasi berhasil! Silakan login.");
-    togglePage('login');
-  } else {
-    alert("Mohon isi semua kolom!");
   }
+
+  return false;
 }
+
+function getLockRemainingTime(username) {
+  const lockInfo = JSON.parse(localStorage.getItem("loginLocks") || "{}");
+  const userLock = lockInfo[username];
+  if (userLock && userLock.lockUntil) {
+    const remaining = userLock.lockUntil - Date.now();
+    return Math.ceil(remaining / 1000); // detik
+  }
+  return 0;
+}
+
+function recordFailedAttempt(username) {
+  const lockInfo = JSON.parse(localStorage.getItem("loginLocks") || "{}");
+  if (!lockInfo[username]) {
+    lockInfo[username] = { attempts: 1 };
+  } else {
+    lockInfo[username].attempts += 1;
+  }
+
+  if (lockInfo[username].attempts >= 5) {
+    lockInfo[username].lockUntil = Date.now() + 15 * 60 * 1000; // 15 menit
+  }
+
+  localStorage.setItem("loginLocks", JSON.stringify(lockInfo));
+}
+// ==================================
 
 function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const selectedRole = document.getElementById("role").value;
+
+  if (isAccountLocked(username)) {
+    const remaining = getLockRemainingTime(username);
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    alert(`Akun dibekukan! Coba lagi dalam ${minutes} menit ${seconds} detik.`);
+    return;
+  }
 
   const users = JSON.parse(localStorage.getItem("users") || "[]");
 
@@ -65,8 +93,36 @@ function login() {
     } else {
       document.getElementById("adminTools").classList.add("hidden");
     }
+
+    const lockInfo = JSON.parse(localStorage.getItem("loginLocks") || "{}");
+    delete lockInfo[username];
+    localStorage.setItem("loginLocks", JSON.stringify(lockInfo));
   } else {
+    recordFailedAttempt(username);
     alert("Login gagal! Periksa kembali username, password, dan role Anda.");
+  }
+}
+
+function register() {
+  const username = document.getElementById("newUsername").value.trim();
+  const password = document.getElementById("newPassword").value.trim();
+  const role = document.getElementById("newRole").value;
+
+  if (username && password) {
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    if (users.find(user => user.username === username)) {
+      alert("Username sudah terdaftar!");
+      return;
+    }
+
+    users.push({ username, password, role });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Registrasi berhasil! Silakan login.");
+    togglePage('login');
+  } else {
+    alert("Mohon isi semua kolom!");
   }
 }
 
@@ -86,8 +142,7 @@ function showAlert(message) {
 
 function showForm(type) {
   const container = document.getElementById("formContainer");
-  container.classList.remove("form-absen", "form-cuti", "form-kasbon");
-
+  container.className = ""; // Reset
   let formHTML = `<div id="alertBox" class="alert hidden"></div>`;
 
   if (type === "cuti") {
@@ -262,7 +317,7 @@ function showRiwayat() {
     </div>
   `;
   container.innerHTML = html;
-  window._riwayatData = { cuti: userCuti, kasbon: userKasbon }; // Simpan data global
+  window._riwayatData = { cuti: userCuti, kasbon: userKasbon };
 }
 
 function generateRiwayatHTML(cuti, kasbon) {
@@ -343,6 +398,7 @@ function exportToExcel() {
   link.download = "riwayat_cuti_kasbon.csv";
   link.click();
 }
+
 
 
 
